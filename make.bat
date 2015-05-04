@@ -2,14 +2,14 @@
 cd %1
 
 call:cleanup
-tskill acrobat  
-pdflatex %2.tex
-bibtex %2
-pdflatex %2.tex
-pdflatex %2.tex
-makeindex %2.nlo -s nomencl.ist -o %2.nls
-pdflatex %2.tex
-START "" %2.pdf
+taskkill /F /IM AcroRd32.exe
+pdflatex thesis.tex
+bibtex thesis
+pdflatex thesis.tex
+pdflatex thesis.tex
+makeindex thesis.nlo -s nomencl.ist -o %2.nls
+pdflatex thesis.tex
+START "" thesis.pdf
 
 :cleanup
 :: del *.log
