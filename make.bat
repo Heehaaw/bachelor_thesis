@@ -22,4 +22,5 @@ del *.toc
 del *.ilg
 del *.nlo
 del *.nls
+del *.lot
 goto:eof
