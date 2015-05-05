@@ -5,9 +5,8 @@ call:cleanup
 taskkill /F /IM AcroRd32.exe
 pdflatex thesis.tex
 bibtex thesis
+makeindex thesis.nlo -s nomencl.ist -o thesis.nls
 pdflatex thesis.tex
-pdflatex thesis.tex
-makeindex thesis.nlo -s nomencl.ist -o %2.nls
 pdflatex thesis.tex
 START "" thesis.pdf
 
@@ -20,4 +19,7 @@ del *.blg
 del *.brf
 del *.out
 del *.toc
+del *.ilg
+del *.nlo
+del *.nls
 goto:eof
