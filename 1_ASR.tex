@@ -1,8 +1,12 @@
 \chapter{Automatic Speech Recognition}
 
+V této kapitole se čtenář seznámí s některými základními paradigmaty ASR, dozví se, jak ASR proces vypadá. Zároveň je zde představen úvodní formalismus problematiky.
+
+Nejprve se čtenář dočte o tom, co to vlastně ASR je, poté jak ASR probíhá. Nahlédne pod pokličku základů zpracování signálu, inherentních jazykových omezení, modelování ASR systémů a nakonec i hodnocení kvality výstupu.
+
 \section{Co je to ASR}
 
-ASR (Automatic Speech Recognition) je teoretický model, založený na pravděpodobnostních vlastnostech akustických pozorování, který formalizuje převod mluveného slova do textu. Přeneseně se takto označují i konkrétní systémy a implementace, které tohoto modelu využívají. 
+ASR je teoretický model, založený na pravděpodobnostních vlastnostech akustických pozorování, který formalizuje převod mluveného slova do textu. Přeneseně se takto označují i konkrétní systémy a implementace, které tohoto modelu využívají. 
 
 Ultimátním cílem  je získat systém, který bude v reálném čase převádět přirozenou lidskou řeč na text se stoprocentní úspěšností pro všechna slova, nezávisle na zkreslení vstupních zařízení, okolním ruchu, nebo přízvuku mluvčích. Již v minulosti ASR systémy dosahovaly i kolem devadesátiprocentní úspěšnosti \cite{jelinek_1976}. Nyní lze nalézt systémy s úspěšností i větší, hlavně však systémy optimalizovanější a výkonnější.
 
@@ -31,13 +35,16 @@ Pro reprezentaci a zpracování signálu se běžně využívají dva druhy anal
 
 \subsection{Fourierovská analýza}
 
-{\sl {\sl Discrete-time} Fourierova transformace} je vztah:
+{\sl Discrete-time Fourierova transformace} je vztah:
+%
 \begin{align}
 	\label{eq:dtft}
 	X(e^{j\omega}) &= \sum\limits_{n=-\infty}^{+\infty} x[n] e^{-j\omega n}\\
 	          x[n] &= \frac{1}{2\pi} \int_{-\pi}^{\pi} X(e^{j\omega})e^{j\omega n} d\omega
 \end{align}
+%
 jemuž pro konvergenci postačuje podmínka:
+%
 \begin{equation}
 	\label{eq:dtft_conv}
 	\sum\limits_{n=-\infty}^{+\infty} |x[n]| < +\infty
@@ -121,7 +128,7 @@ Patří sem například:
 \item Fonotaktická omezení -- kupříkladu zjednodušení konsonantických shluků u menších dětí (\uv{uličnice} - \uv{ulitite}), nebo nesmyslná, rádoby přejatá slova (\uv{sympathetic} - \uv{sympatetický})
 \item Syntaktická omezení -- \uv{jedu na výlet do Českých Budějovic} - \uv{Českých výlet na Budějovic jedu do}
 \item Sémantická omezení -- \uv{zapal sirku} - \uv{zapal si ruku}
-\item Lexikální omezení -- \uv{šuplánek} ani \uv{niplavý} nejsou česká slova
+\item Lexikální omezení -- \uv{šuplánek} ani \uv{niplavý} nejsou česká slova a nemají tedy žádnou projekci v našem vědomí
 \end{itemize}
 
 a mnohá další.
@@ -133,7 +140,7 @@ V ASR procesu se stroj pokouší nalézt co možná nejlepší shodu získaného
 \subsection{Maximum a Posteriori formulace}
 
 Tato formulace se \uv{pokouší nalézt nejpravděpodobnější sekvenci slov $W^*$ při daném akustickém vstupu $A$} \cite{jelinek_2010}. \nom{MAP}{Maximum a Posteriori} přístup \cite{bahl_jelinek_1983} lze typicky vyjádřit jako:
-
+%
 \begin{equation}
 	\label{eq:map}
 	W^* = \arg \max_{W} P(W|A)
@@ -150,14 +157,14 @@ Pro náhodné nezávislé jevy $X$ a $Y$ platí:
 \end{t:bayes}
 
 Za použití \ref{eq:bayes} můžeme upravit pravou stranu rovnosti \ref{eq:map}, čímž dostaneme vztah:
-
+%
 \begin{equation}
 	\label{eq:map2}
 	W^* = \arg \max_{W} \frac{P(A|W) P(W)}{P(A)}
 \end{equation}\
 %
 kde $P(A|W)$ je nazývána charakteristikou akustického modelu (\nom{AM}{Acoustic Model} -- Acoustic Model) a $P(W)$ charakteristikou jazykového modelu (\nom{LM}{Language Model} -- Language Model). Jelikož $P(A)$ je konstantní vůči této maximalizaci, můžeme se jí hladce zbavit a psát:
-
+%
 \begin{equation}
 	\label{eq:map3}
 	W^* = \arg \max_{W} P(A|W) P(W)
@@ -168,14 +175,14 @@ kde $P(A|W)$ je nazývána charakteristikou akustického modelu (\nom{AM}{Acoust
 Modelování jazyka poskytuje nástroj, jak odlišit slova a fráze, které zní podobně, či stejně (homografy, homofony, homonyma). Kupříkladu v americké angličtině jsou věty \uv{recognize speech} a \uv{wreck a nice beach} sémanticky diametrálně odlišné, foneticky jsou to však věty téměř homofonní. 
 
 Jelikož vyhledávání je v drtivé většině případů pouze jednosměrné, můžeme pravděpodobnost posloupnosti slov $W = w_1, \dots, w_n = w^n_i$ vyjádřit pomocí řetízkového pravidla a napsat jako:
-
+%
 \begin{equation}
 	\label{eq:lm}
 	P(w^n_i) = \prod\limits_{i=1}^n P(w_i|w^{i-1}_1)
 \end{equation}
 
 Protože sekvence $W$ může mít jednoduše příliš mnoho prvků a navíc pravděpodobnost $P(w_i)$ nemusí nutně záviset na úplně celé historii $h_i = w_1^{i-1}$, slučujeme $h_i$ do tříd ekvivalence $\Phi (h_i)$, čímž dospíváme k:
-
+%
 \begin{equation}
 	\label{eq:lm_ec}
 	P(w^n_i) \approx \prod\limits_{i=1}^n P(w_i|\Phi (h_i))
@@ -184,7 +191,7 @@ Protože sekvence $W$ může mít jednoduše příliš mnoho prvků a navíc pra
 Jak možno nahlédnout, pro kvalitní odhad je kritické určit dobré zobrazení $\Phi$. Čím lepší návrh tohoto zobrazení, tím lepší informaci získáme o $w_i$, využívaje historie $\Phi (h_i)$.
 
 Zde nastupují na scénu {\sl n-gram} modely \cite{byeo_2012}\cite{masa_1997}, které v tomto případě zavádějí $n-1$ předchozích slov pro reprezentaci historie, tj. $\Phi (h_i) = w_{i-(n-1)}^{i-1}$, čímž získáme:
-
+%
 \begin{equation}
 	\label{eq:lm_ec}
 	P(w^n_i) \approx \prod\limits_{i=1}^n P(w_i|w_{i-(n-1)}^{i-1})
@@ -197,7 +204,7 @@ Například uvážíme-li {\sl bigram} ({\sl n-gram}, $n = 2$), pravděpodobnost
 \end{align*}
 %
 lze vyjádřit jako:
-
+%
 \begin{align*}
 	P(W) =&~P(Ceske|<\! start\!>)P(Budejovice|Ceske)\\
 	      &~P(jsou|Budejovice)P(krasne|jsou)\\
@@ -205,7 +212,7 @@ lze vyjádřit jako:
 \end{align*}
 
 Pravděpodobnosti $P(w_i|w_{i-(n-1)}^{i-1})$ můžeme dále odečíst z natrénovaných dat vztahem:
-
+%
 \begin{equation}
 	\label{eq:lm_est}
 	P(w_i|w_{i-(n-1)}^{i-1}) = \frac{c(w_{i-(n-1)}^{i})}{c(w_{i-(n-1)}^{i-1})}
@@ -229,17 +236,17 @@ Skryté Markovovy modely (\nom{HMM}{Hidden Markov Model}s -- Hidden Markov Model
 
 Při použití HMMs jeden HMM reprezentuje každý foném, slova vznikají konkatenací menších HMMs, věty na oplátku konkatenací těchto HMMs a tak dále.
 
-Proč zrovna \uv{skrytý} Markovův model? Tento název vychází z definice \uv{skrytého} Markovova procesu (\nom{HMP}{Hidden Markov process} -- Hidden Markov process), který popíšeme za pomoci kolegů Alibaby a Rychlonožky a jejich uren. 
+Proč zrovna \uv{skrytý} Markovův model? Tento název vychází z definice \uv{skrytého} Markovova procesu (\nom{HMP}{Hidden Markov Process} -- Hidden Markov Process), který popíšeme za pomoci kolegů Alibaby a Rychlonožky a jejich uren. 
 
 Vezměme myšlenkový experiment, kde v místnosti za zavřenými dveřmi žije Alibaba se třemi svými urnami $u_1, u_2, u_3$. Každá urna obsahuje známou množinu kuliček $\{k_{u_i}\}_1^n$, kde platí $(\forall u \in \{u_1, u_2, u_3\})(\forall j \in \{1,\dots,n\})(k_{uj} \in \{c_1,\dots,c_n\})$, tedy každá kulička z každé urny je jedné z barev $c$. Alibaba bude nyní ďábelským způsobem tahat kuličky z uren, a sice tak, že $l$-tou kuličku $K_l$  vytáhne náhodně a pouze s ohledem na $K_{l-1}$. Tomuto procesu se říká Markovův proces. Jelikož Alibaba na běhání nikdy nebyl, dá taženou $K_l$ Rychlonožkovi, který vyběhne ven dveřmi a složí $K_l$ k nohám nezávislého pozorovatele, hned vedle kuličky $K_{l-1}$ do řady.
 
 Pozorovatel sice zná složení kuliček v urnách, ale nemá ani tušení, co se za dveřmi děje --- Markovův proces je skrytý --- takže může pouze smutně sledovat sekvenci kuliček, rodící se mu pod nohama. Po $1<m<n$ tazích a Rychlonožkovo sprintech bude mít pozorovatel v zorném poli posloupnost kuliček $K_1^m$. Problém ale nastává, chce-li pozorovatel určit z jaké urny byla tažena $K_m$. Ani v případě, že $(\exists i \in \{1, 2, 3\})(K_1^m \subseteq \{k_{u_i}\}_1^m)$ si totiž nemůže být jist.
 
-Nicméně, pozorovatel se může alespoň pokusit odhadnout pravděpodobnost, že $K_m$ byla z urny $i$.
+Nicméně, pozorovatel se může alespoň pokusit odhadnout pravděpodobnost, že $K_m$ byla z urny $i$, což se právě HMMs pokouší zachytit.
 
 \subsection{Lexikální modely}
 
-Lexikální modely popisují vztah mezi jednotkami akustickými (fonémy -- části slova mluveného, popsané akustickými modely) a lexikálními (lexémy -- jazykový odraz reality na vědomí). 
+Lexikální modely popisují vztah mezi jednotkami akustickými (fonémy -- části slova mluveného, popsané akustickými modely) a lexikálními (lexémy -- množina všech tvarů určitého slova, nebo jeho části). 
 
 Pro ilustraci lexému vezměme slova \uv{ředkvička} a \uv{ředkvičky}; mají rozdílné gramatické a sémantické významy (singulár a plurál téhož), lexikální význam je ale stejný (malý, načervenalý, jedlý kořen). 
 
@@ -248,7 +255,7 @@ Jednou z výzev navrhování ASR systému je popsat tyto vztahy pro jazyk, kde l
 Pro jazyky obtížné, s ne zcela formálními lexikálními příznaky, lze lexikální model odvodit z některého lexikálního modelu již známého -- aplikací známého modelu na nový jazyk a jeho postupnou adaptací.
 
 Zavedeme-li $\Theta = \{\Theta_A, \Theta_L\}$ množinu parametrů akustických a jazykových modelů, kde $\Theta_A = \{\theta_a, \theta_pr, \theta_l\}$ jsou parametry akustického modelu, respektive lexikonu, respektive lexikálního modelu, můžeme s využitím \ref{eq:map} a \ref{eq:bayes} rozvést:
-
+%
 \begin{align}
 	\label{eq:lm}
 	W^* &= \arg \max_W P(W|A, \Theta)\\
@@ -257,7 +264,7 @@ Zavedeme-li $\Theta = \{\Theta_A, \Theta_L\}$ množinu parametrů akustických a
 \end{align}
 
 Hledání nejpravděpodobnější sekvence $W^*$ pro akustický vstup $A$ pak můžeme díky lexikálnímu modelování transformovat na problém hledání nejpravděpodobnější posloupnosti stavů $Q^*$:
-
+%
 \begin{align}
 	\label{eq:lm_state}
 	Q^* &= \arg \max_Q P(Q,A|\Theta)\\
@@ -265,5 +272,45 @@ Hledání nejpravděpodobnější sekvence $W^*$ pro akustický vstup $A$ pak m�
 	    &= \arg \max_Q \sum\limits_{t=1}^T (\log p(a_t|q_t = l^i, \Theta_A) + \log P(q_t = l^i|q_{t-1} = l^i, \Theta)) 
 \end{align}
 %
-kde $T$ je celkový počet uvažovaných oken, $Q = \{q_1,\dots,q_t\}$ jde přes všechny posloupnosti možných HMM stavů, $q_t \in \{l^1,\dots,l^i,\dots,l^I\}$ a $I$ značí počet lexémů. Obvykle je výraz $\log p(a_t|q_t = l^i, \Theta_A)$ označován jako lokální emisní skóre (\nom{LES}{Local Emission Score} -- Local Emission Score) a výraz 
-$\log P(q_t = l^i|q_{t-1} = l^i, \Theta)$ jako přechodové skóre (\nom{TS}{Transition Score} -- Transition Score).
+kde $T$ je celkový počet uvažovaných oken, $Q = \{q_1,\dots,q_t\}$ jde přes všechny posloupnosti možných HMM stavů, $q_t \in \{l^1,\dots,l^i,\dots,l^I\}$ a $I$ značí počet lexémů. Obvykle je výraz $\log p(a_t|q_t = l^i, \Theta_A)$ označován jako {\sl lokální emisní skóre} (\nom{LES}{Local Emission Score} -- Local Emission Score) a výraz $\log P(q_t = l^i|q_{t-1} = l^i, \Theta)$ jako {\sl přechodové skóre} (\nom{TS}{Transition Score} -- Transition Score).
+
+\section{Hodnocení výstupů ASR}
+
+Zásadním problémem výstupu ASR systémů je, že rozpoznaná sekvence slov $W^*$ může mít rozdílnou délku od referenční sekvence slov (buďto známé, nebo neznámé, každopádně ale té domněle správné). 
+
+{\sl Míra chybovosti slov} (\nom{WER}{Word Error Rate} -- Word Error Rate) je metrika založená na Levenshteinově (editační) vzdálenosti (\nom{LD}{Levenshtein Distance} -- Levenshtein Distance) \cite{schluter_2010}.
+
+Formálně je LD mezi dvěma textovými řetězci $a, b$ dána jako $ld_{a,b}(|a|,|b|)$:
+%
+\begin{align}
+	\label{eq:ld}
+	ld_{a,b}(0,0) &= 0\\
+	ld_{a,b}(i,0) &= i\\
+	ld_{a,b}(0,j) &= j\\
+	ld_{a,b}(i,j) &= 
+	\min
+	\begin{cases}
+		ld_{a,b}(i-1,j-1)+0, & \text{pro}\;a_i = b_j \\
+		ld_{a,b}(i-1,j-1)+1  & (\text{nahrazení}) \\
+		ld_{a,b}(i,j-1)+1    & (\text{vložení}) \\
+		ld_{a,b}(i-1,j)+1    & (\text{vypuštění})
+	\end{cases}
+\end{align}
+%
+kde $1 \le i \le |a|, 1 \le j \le |b|$.
+
+WER je pak odvozena z LD, pracujíc na úrovni slov místo na úrovni menších jednotek:
+%
+\begin{equation}
+	\label{eq:wer}
+	WER = \frac{S+D+I}{N}
+\end{equation}
+%
+kde
+%
+\begin{itemize}
+\item $S$ je počet nahrazení slova slovem
+\item $D$ je počet vypuštěných slov
+\item $I$ je počet vložení nových slov
+\item $N$ je počet slov v referenční sekvenci
+\end{itemize}
