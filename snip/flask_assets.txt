@@ -1,0 +1,28 @@
+> pip install Flask-Assets
+
+----------
+
+#hello.py
+from flask.ext.assets import Environment, Bundle
+# ... Flask app initialization and setup
+assets = Environment(app)
+bundles = {
+    'all-css': Bundle(
+        'css/style.css', 'css/font.css',
+        output='gen/all.css', filters='cssmin'),
+    'all-js': Bundle(
+        'js/app.js', 'js/i18n.js',
+        output='gen/all.js', filters='jsmin')
+}
+assets.register(bundles)
+# Flask app run ...
+
+----------
+
+<!-- index.html -->
+{% assets 'all-css' %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}"/>
+{% endassets %}
+{% assets 'all-js' %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}

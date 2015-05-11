@@ -1,0 +1,13 @@
+{
+    'result': [{
+        'alternative': [{
+          'confidence': 0.5549500584602356,
+          'transcript': 'WHERE AM I NOW'
+        }, {
+          'confidence': 0.14846260845661163,
+          'transcript': 'WHERE AM I NOWADAYS'
+        }],
+        'final': true
+    }],
+    'result_index': 0
+}

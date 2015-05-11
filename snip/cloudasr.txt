@@ -1,0 +1,25 @@
+<!-- index.html -->
+<script src="http://www.cloudasr.com/static/js/socket.io.js"/>
+<script src="http://www.cloudasr.com/static/js/Recorder.js"/>
+<script 
+    src="http://www.cloudasr.com/static/js/SpeechRecognition.js"/>
+
+----------
+
+// game.js
+var speechRecognition = new SpeechRecognition(
+    'http://api.cloudasr.com:80'
+);
+speechRecognition.onResult = function(res) {/* process result */};
+speechRecognition.onStart = function() {/* handle start event */};
+speechRecognition.onEnd = function() {/* handle end event */};
+speechRecognition.onError = function(err) {/* handle error */};
+
+$('#recordButton').on('click', function(){
+    if(speechRecognition.isRecording){
+        speechRecognition.stop();
+    }
+    else{
+       speechRecognition.start('en-wiki');
+    }
+});

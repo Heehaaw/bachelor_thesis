@@ -1,6 +1,138 @@
 \chapter{Použité technologie}
 
-\section{Kapitola}
+V této kapitole se čtenář seznámí s technologiemi, frameworky a prostředími, využitými pro vývoj aplikace \verb|trogASR|. U každého z nich se navíc ve stručnosti dozví o díle zapojení daného nástroje do aplikace.
 
-\section{Kapitola}
+Všechny nástroje jsou buď {\sl open-source}, {\sl freeware}, nebo je pro ně volně dostupná akademická licence.
 
+\section{Python}
+
+\verb|Python|\footnote{\url{https://www.python.org/}} je {\sl open source} vysokoúrovňový skriptovací programovací jazyk. Nabízí širokou škálu programátorských paradigmat, jako například \nom{OOP}{Object Oriented Programming} (objektově orientované programování), imperativní, procedurální, nebo funkcionální přístup k programování.
+
+Tento jazyk v osmdesátých letech dvacátého století navrhl Guido van Rossum. V roce 1989 započal vývoj. Od té doby popularita \verb|Python|u vzrostla natolik, že se stal základní součástí většiny distribucí systému Linux. Lze jej však velmi snadno instalovat i do jiných operačních systémů.
+
+Hlavními návrhovými milníky a posléze i výhodami \verb|Python|u jsou jeho orientace na čistotu a efektivitu psaní kódu, na velkou modularitu a na výraznou uživatelskou přívětivost. Některými dokonce \verb|Python| bývá považován za nejvhodnější programovací jazyk pro začátečníky.
+
+V aplikaci \verb|trogASR| bylo \verb|Python|u využito pro tvorbu {\sl back-end}u, tj. pro tvorbu prostředí aplikačního serveru za pomoci \nom{MVC}{Model View Controller} (Model View Controller) návrhového vzoru a pro operování s databází.
+
+\section{Flask}
+
+\verb|Flask|\footnote{\url{http://flask.pocoo.org/}} je {\sl microframework} napsaný v \verb|Python|u, založený na knihovně \verb|Werkzeug|\footnote{\url{http://werkzeug.pocoo.org/}} a na templatovacím systému \verb|Jinja2|\footnote{\url{http://jinja.pocoo.org/}}.
+
+Označení {\sl microframework} nese \verb|Flask| proto, že se jedná vskutku o framework minimalistický. Základní distribuce obsahuje pouze nástroje nezbytně nutné pro běh webové aplikace. Velký důraz je však kladen na modularitu tohoto frameworku; uživatel má tedy možnost doinstalovat si do svého prostředí právě ta rozšíření, která potřebuje.
+
+Obrázek \ref{fig:flask_install} ukazuje, že instalace \verb|Flask|u je velice snadná. Stačí mít funkční prostředí \verb|Python|u a o zbytek se již může postarat nástroj \verb|easy_install| a \verb|pip|. Pro zprovoznění základní webové aplikace poté stačí už jen sedm řádek kódu.
+\\
+\begin{figure}[h]
+	\verbatiminput{snip/flask.txt}
+	\caption{Příklad instalace frameworku Flask na MS Windows, kódu modulu "hello"\;a spuštění webového serveru.}
+	\label{fig:flask_install}
+\end{figure}
+
+Frameworku \verb|Flask| bylo v aplikaci \verb|trogASR| využito především proto, že tento framework je velmi jednoduchý na použití; naprosto oproštěn od přebytečných součástí, které by bylo třeba konfigurovat, ačkoli by je aplikace nevyužívala. Zároveň \verb|Flask| oplývá širokou komunitou uživatelů, schopných poradit s problémem, a exhaustivní dokumentací.
+
+\subsection{Flask-Assets}
+
+\begin{figure}[h]
+	\verbatiminput{snip/flask_assets.txt}
+	\caption{Příklad instalace balíčku Flask-Assets na MS Windows, zapojení do modulu "hello"\;a ukázka použití v Jinja2 HTML templatu.}
+	\label{fig:flask_a_install}
+\end{figure}
+
+\verb|Flask-Assets|\footnote{\url{http://flask-assets.readthedocs.org/}} je rozšiřovací balíček pro \verb|Flask| framework, který řeší správu a minifikaci statických skriptů a stylů.
+
+Jak ukazuje obrázek \ref{fig:flask_a_install}, instalace je opět triviální, používání balíčku pak velmi intuitivní a praktické.
+
+Rozšíření \verb|Flask-Assets| lze také jednoduše konfigurovat. Například spouštíme-li aplikaci v {\sl debug} módu, můžeme knihovně říci, aby poskytovala nesloučené a neminifikované zdroje.
+
+Tato knihovna je v aplikaci \verb|trogASR| využívána hlavně z důvodu pohodlnosti správy statických zdrojů.
+
+\subsection{SQLite3}
+
+Pro správu databáze byl zvolen {\sl light-weight} framework \verb|SQLite3|. Tento přichází již zahrnut jako součást instalace frameworku \verb|Flask|.
+
+Aplikace \verb|trogASR| využívá tento framework kvůli jeho jednoduchosti. V budoucnosti je jednoduše možné jej nahradit některým z pokročilejších frameworků.
+
+\section{JavaScript}
+
+\verb|JavaScript| (\nom{JS}{JavaScript}) je multiplatformní, objektově orientovaný, interpretovaný skriptovací jazyk. Jeho autorem je Brendan Eich ze společnosti Netscape.
+
+JS sice svou syntaxí patří do rodiny jazyků \verb|C/C++/Java|, s posledním zmíněným jazykem však krom slova \verb|Java| v názvu a podobné syntaxe nemá nic společného. Volba názvu má čistě marketingové důvody -- těžila právě z oblíbenosti jazyka \verb|Java|. Standardizovaným jménem JS je podle \nom{ISO}{International Organization for Standardization} (International Organization for Standardization) \verb|ECMAScript|.
+
+JS je dnes již tak rozšířen, že jeho interpretaci podporuje drtivá většina současných webových prohlížečů. Nejčastějším využitím JS je totiž manipulace s WWW stránkou a ovládání všemožných prvků \nom{GUI}{Graphic User Interface} (Graphic User Interface).
+
+Protože aplikace \verb|trogASR| je velmi dynamická a odesílat data při každé uživatelské akci na server by způsobovalo uživateli nemalou frustraci odezvou, je JS zhusta využíván. Pomocí JS je řešena naprostá většina animací, přechodů a dynamických prvků aplikace.
+
+\subsection{jQuery}
+
+\verb|jQuery|\footnote{\url{https://jquery.com/}} je malý, rychlý a možnostmi bohatý JS framework. Umožňuje uživateli zefektivnit proces psaní kódu, zjednodušit manipulaci s \nom{DOM}{Document Object Model} (Document Object Model) a obalit a zpříjemnit využití technologie \nom{AJAX}{Asynchronous JavaScript and XML} (Asynchronous JavaScript and XML).
+
+Pro jeho jednoduchost, flexibilitu a ohromující uživatelskou komunitu byl \verb|jQuery| framework zvolej jako základní kámen celé aplikace \verb|trogASR|.
+
+\subsection{transform.js}
+
+\verb|transform.js|\footnote{\url{http://louisremi.github.io/jquery.transform.js/}} je minimalistický \verb|jQuery| plugin, umožňující animaci \nom{CSS}{Cascading Style Sheets} (Cascading Style Sheets -- kaskádové styly) vlastností {\sl transform}.
+
+Jednoduchým zapojením a použitím získal tento plugin své místo v aplikaci \verb|trogASR|.
+
+\section{HTML5}
+
+\nom{HTML}{HyperText Markup Language} (HyperText Markup Language -- hypertextový značkovací jazyk) verze 5 je nejnovější iterací HTML jazyka. Přináší oproti svému předchůdci, verzi 4.01, nové sémantické prvky, vyřazuje zastaralé konstrukty z jazyka a opravuje řadu chyb.
+
+HTML5 jazyka je v aplikaci \verb|trogASR| využito pouze poskrovnu; je nasazen pouze jako rámec aplikace, do kterého se většina obsahu generuje dynamicky s použitím JS.
+
+Zároveň některých nových možností HTML5 využívá knihovna \verb|CloudASR| (jmenovitě API pro záznam zvuku).
+
+\section{CSS3}
+
+CSS technologie umožňuje programátorům a návrhářům oddělit strukturu a obsah HTML stránky od jejího vzhledu. CSS jazyk popisuje vztahy mezi elementy ve stránce a způsoby zobrazení. Díky tomuto popisu je možno vytvořit dobře znovupoužitelné nastavení, které je transparentně přenositelné mezi prvky nejen v jedné stránce, ale i mezi prohlížeči a platformami. Autorem konceptu CSS byl Håkon Wium Lie a standardizační organizace \verb|W3C|\footnote{\url{www.w3.org/}}.
+
+Kaskádové styly verze 3 přináší na trh přehršel nových, užitečných konceptů. Mezi tyto patří například příchod {\sl @media} pravidla pro zachycení a podmínění stylů podle využitého zobrazovacího zařízení, nebo zavedení {\sl transform} a {\sl transition} vlastností elementů pro usnadnění pozicování a animace.
+
+Aplikace \verb|trogASR| využívá CSS3 velmi extenzivně. CSS pravidla definují vzhled všech prvků, které uživatel vidí, a dokonce i některých animovaných přechodů.
+
+\section{CloudASR}
+
+\verb|CloudASR|\footnote{\url{http://www.cloudasr.com/}} je softwarová platforma a veřejná ASR služba. Za jejím vznikem stojí kolega Ondřej Klejch, který tuto platformu vyvinul v rámci své diplomové práce na MFF.
+
+Hlavními rysy \verb|CloudASR| platformy jsou především 
+
+\begin{itemize}
+\item automatické škálování podle zatížení
+\item jednoduchost nasazení a provozu
+\item cloudová nátura
+\item {\sl state-of-the-art} inkrementální rozpoznávání řeči
+\item kompatibilita s {\sl Google Speech API}
+\item rozšiřitelnost o nové ASR enginy
+\end{itemize}
+
+\verb|CloudASR| také poskytuje JS knihovnu, jejíž zapojení si aplikace \verb|trogASR| z titulu práce žádala. Této knihovny je využito právě pro transformaci hlasového vstupu na výstup textový. Její zavedení demonstruje obrázek \ref{fig:cloudasr}.
+
+Obrázek \ref{fig:cloudasr_final} pak ukazuje, jak vypadají \nom{JSON}{JavaScript Object Notation} (JavaScript Object Notation) objekty, které JS knihovna dodává na konci samotného rozpoznávání.
+
+\begin{figure}[h]
+	\verbatiminput{snip/cloudasr.txt}
+	\caption{Ukázka zapojení CloudASR JS knihovny.}
+	\label{fig:cloudasr}
+\end{figure}
+
+\begin{figure}[h]
+	\verbatiminput{snip/cloudasr_final.txt}
+	\caption{Příklad finálního výsledku rozpoznávání.}
+	\label{fig:cloudasr_final}
+\end{figure}
+
+\section{PyCharm}
+
+\verb|PyCharm|\footnote{\url{https://www.jetbrains.com/pycharm/}} je vývojové prostředí, vyvíjené a udržované společností \verb|JetBrains|. Je určeno převážně pro vývoj aplikací v jazyce \verb|Python|, oplývá však i velmi sofistikovaným prostředím pro vývoj v JS.
+
+JS podpora sahá až na úroveň nativního zapojení všemožných frameworků, jako jsou například právě \verb|jQuery|, ale i \verb|ExtJS|, nebo \verb|Node.js|.
+
+Obecně je práce v tomto vývojovém nástroji velmi příjemná. Kontextová inteligentní nápověda, možnosti refaktoringu a projektově-přehledové nástroje hledají na dnešním trhu kompetici jen těžce.
+
+\section{Několik slov o webových prohlížečích}
+
+V současné době je trh s webovými prohlížeči poměrně rozmanitý. Běžný uživatel má na výběr nepřeberné množství různých řešení, více i méně rozšířených a použitelných.
+
+Bohužel, ani po několika letech existence norem HTML5 a CSS3 nejsou tyto v naprosté většině zmíněných prohlížečů podporovány, nebo jsou podporovány jen částečně, nebo chybně.
+
+Proto aplikace \verb|trogASR| necílí na multiplatformnost. Bude fungovat pouze v prohlížečích, které dostatečně podporují čisté HTML5 a CSS3. Těmito jsou k dnešnímu dni pouze prohlížeče \verb|Google Chrome| (verze 41) a \verb|Opera Next| (verze 29).

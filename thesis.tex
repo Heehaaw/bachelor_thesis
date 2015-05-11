@@ -37,6 +37,7 @@
 \usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{epigraph}
+\usepackage{verbatim}
 
 %% Balíček hyperref, kterým jdou vyrábět klikací odkazy v PDF,
 %% ale hlavně ho používáme k uložení metadat do PDF (včetně obsahu).
@@ -68,17 +69,19 @@
    \par\nobreak
    \vskip 20\p@
 }}
+\def\verbatim@font{\linespread{1}\normalfont\ttfamily}
 \makeatother
 
 % Toto makro definuje kapitolu, která není očíslovaná, ale je uvedena v obsahu.
 \def\chapwithtoc#1{
-\chapter*{#1}
-\addcontentsline{toc}{chapter}{#1}
+	\chapter*{#1}
+	\addcontentsline{toc}{chapter}{#1}
 }
 
+\setlength{\nomitemsep}{-\parsep}
 \def\printnom#1{
-\renewcommand{\nomname}{#1}
-\printnomenclature[2cm]
+	\renewcommand{\nomname}{#1}
+	\printnomenclature[2cm]
 }
 
 \def\nom#1#2{#1\nomenclature{#1}{#2}}
@@ -281,7 +284,7 @@ automatic speech recognition, ASR, games, web, HTML5, Javascript
 \include{6_literature}
 
 %%% Tabulky v bakalářské práci, existují-li.
-\chapwithtoc{Seznam tabulek}
+%\chapwithtoc{Seznam tabulek}
 
 %%% Použité zkratky v bakalářské práci, existují-li, včetně jejich vysvětlení.
 \printnom{Seznam použitých zkratek}
