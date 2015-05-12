@@ -1,0 +1,5 @@
+/* style.css */
+#localeSelector .localeSelectorItem.klingon {
+    background: url('img/ico/klingon.png') no-repeat right top;
+    background-size: contain;
+}

@@ -1,0 +1,9 @@
+// spriteFactory.js
+var letterMap = { '♥': 'H1' /*, ...*/ };
+
+---------
+
+/* font.css */
+.letter-H1 {
+    background: url('img/font/klingon/H1.png') no-repeat right top;
+}

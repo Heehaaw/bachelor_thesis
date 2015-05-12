@@ -1,0 +1,10 @@
+// options.js
+var languages = {
+  KLINGON_EN: {
+      id: 'KLINGON_EN',
+      getText: APP.I18N.keys.OPTIONS_LANGUAGE_KLINGON_EN.getText,
+      source: 'klingon',
+      target: 'en'
+  },
+  //...
+};

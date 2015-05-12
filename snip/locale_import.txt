@@ -1,0 +1,3 @@
+> python
+>>> from db.import_dict import import_dict
+>>> import_dict('/dictionaries/klingon_en.csv', 'klingon', 'en')

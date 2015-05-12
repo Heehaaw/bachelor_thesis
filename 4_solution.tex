@@ -1,5 +1,209 @@
 \chapter{Implementace}
 
-\section{Kapitola}
+V této kapitole se čtenář dočte o implementaci aplikace \verb|trogASR|. Bude obeznámen s pilíři aplikace, nahlédne na vývoj aplikace jako na řešení komplexní, i po částech.
 
-\section{Kapitola}
+Nejprve se čtenář dočte o struktuře aplikace --- o modularitě, designu, znovupoužití kódu --- při čemž se seznámí s myšlenkovými pochody, stojícími za návrhem implementace.
+
+Dále se čtenář dozví o interoperabilitě s Facebook \nom{API}{Application Programming Interface} (Application Programming Interface -- aplikační programátorské rozhraní) a o důležité součásti --- internacionalizaci aplikace.
+
+V závěru je pak věnován prostor úhrnu některých použitých návrhových vzorů, principu jejich fungování a projekci do aplikace.
+
+\section{Modulární kostra}
+
+Aplikace \verb|trogASR|, jakkoli neobsahuje žádné extrémně složité algoritmické řešení, byla navrhována a vyvíjena s ohledem na rozšiřitelnost a modularitu. 
+\\
+\begin{figure}[h]
+	\verbatiminput{snip/app.txt}
+	\caption{Ukázka části kódu hlavní komponenty.}
+	\label{fig:app}
+\end{figure}
+
+\begin{figure}[h]
+	\verbatiminput{snip/comp.txt}
+	\caption{Ukázka části internacionalizační komponenty.}
+	\label{fig:comp}
+\end{figure}
+
+Každá komponenta systému musí být registrována v komponentě hlavní, aplikační, a musí splňovat základní implementační požadavky, aby vůbec systémovou komponentou být mohla.
+
+Jelikož v JS neexistuje princip {\sl interface}, muselo být se smluvním typováním nakládáno jinak. Zvoleným přístupem je návrhový vzor {\sl duck-typing} (viz sekce \ref{ssec:ducktyping}).
+
+Prvním krokem je běh JS skriptu, kdy prohlížeč skript interpretuje, jak je vložen do stránky. V tuto chvíli se na prvním místě v pořadí nachází skript inicializující hlavní aplikační komponentu. V této se pak nachází mechanismus pro registraci ostatních komponent.
+
+Každá registrovaná komponenta musí splňovat několik základních vlastností -- musí zpřístupňovat metodu \verb|initComponent()| a metodu \verb|reset()|. První zmíněná metoda je volána na každé komponentě v handleru \verb|window.onload|, zatímco druhá zmíněná metoda je volána při nutnosti znovuvytvoření statických prvků komponenty (například při změně lokále, či při změně velikosti okna). Část implementace aplikační komponenty demonstruje obrázek \ref{fig:app}. Část implementace běžné komponenty pak zobrazuje obrázek \ref{fig:comp}.
+
+\section{Templatovací systém}
+\label{sec:template}
+
+Pro pohodlnost používání a zvětšení znovupoužitelnosti kódu byl do aplikace \verb|trogASR| implementován systém na vytváření a processing HTML templatů. Tohoto systému celá aplikace využívá ve chvíli, potřebuje-li inicializovat jakoukoli komponentu vícekrát (položky menu, tlačítka, ...).
+
+Každý takovýto template má formu HTML kódu, mixovaného s možným JS kódem; vymezeným konstruktem \verb|<% <JS_code> %>|, nebo \verb|<%= <JS_variable> %>|.
+\\
+\begin{figure}[h]
+	\verbatiminput{snip/template.txt}
+	\caption{Ukázka "facebook widget"\;templatu a jeho použití.}
+	\label{fig:template}
+\end{figure}
+
+Všechny tyto templaty jsou uzavřeny v \verb|<script type="text/html"></script>| elementech, kterým interpretující prohlížeč nepřikládá žádnou zvláštní váhu, pouze je vkládá do stránky. Příklad demonstruje obrázek \ref{fig:template}.
+
+\section{Sprite factory a obrázkový font}
+
+Pro účely zvýšení grafické fidelity byla navržena oku lahodící barevná paleta a ji využívající obrázkový font. Tento font je používán pro všechny texty, kde to má smysl, a slova v tomto fontu jsou generována dynamicky pomocí komponenty {\sl sprite factory}.
+
+{\sl Sprite factory} komponenta se stará o vytváření dynamických grafických prvků podle současného nastavení jazyka a velikosti zobrazovacího média. Pro tento proces využívá taktéž templatovací systém (sekce \ref{sec:template}).
+\\
+\begin{figure}[h]
+	\includegraphics[width=100mm]{img/sprite.png}
+	\caption{Položka menu "Play"/"Hrát"\;pro anglické, respektive české jazykové nastavení.}
+	\label{fig:sprite}
+\end{figure}
+
+Slova obrázkového fontu jsou tvořena ze {\sl spritů} jednotlivých písmen, uzavřených do obalovacího \verb|<div>| elementu. Velikost písmen a slov je dána responzivním nastavením aplikace (více v sekci \ref{sec:responsive}). Každé písmeno je reprezentováno vlastním obrázkem, pro nějž existuje CSS styl, který jej zapojí jako pozadí příslušného elementu. Vzhled takto vygenerovaného dynamického slova ukazuje obrázek \ref{fig:sprite}.
+
+\section{Responzivní design}
+\label{sec:responsive}
+
+Protože aplikace \verb|trogASR| se má líbit a být uživatelsky oblíbená, vyvstala nutnost možnosti aplikaci zobrazovat na co možná nejširším spektru zobrazovacích médií. Ačkoli aplikace podporuje jenom specifickou podsekci webových prohlížečů, podporované prohlížeče lze nalézt i na jiných platformách, než jen PC (\nom{PC}{Personal Computer} -- Personal Computer) --- například mobilní zařízení s operačním systémem Android. Zároveň je třeba vzít v potaz i fakt, že zobrazovací média uživatelů běžných PC se liší, někdy i výrazně.
+
+Proto je aplikace \verb|trogASR| navržena čistě dynamicky. Veškeré stylování je činěno pomocí procentuálních poměrů velikostí elementů vůči jejich nadřazeným elementům. 
+
+V místech, kde je procentuální vyjádření nemožné (šířky okrajů, velikosti {\sl box-shadow} vlastností), jsou nasazeny jednotky \verb|vw| a \verb|vh|. Tyto jednotky vyjadřují jedno procento šířky zobrazované plochy (\verb|1vw|), respektive jedno procento její výšky (\verb|1vh|).
+\\
+\begin{figure}[h]
+	\verbatiminput{snip/responsive.txt}
+	\caption{Ukázka propagace dynamické velikosti písmen obrázkového fontu.}
+	\label{fig:responsive}
+\end{figure}
+
+Dynamická velikost písmen obrázkového fontu je zařízena pomocí skrytého \verb|<div>| elementu, který je nastylován na tři procenta šířky zobrazovacího média. V inicializaci komponenty {\sl sprite factory} je posléze tato skutečnost zaznamenána a aplikována na jednotlivá písmena jako jejich výška a šířka (písmena jsou vždy čtvercová). Rozměr písmen a slov je dále možno upravovat posláním multiplikačního parametru velikosti do příslušných metod. Tento proces demonstruje obrázek \ref{fig:responsive}.
+
+Obecně je doporučený minimální poměr stran 1:1, maximální pak 2:1. Optimální poměry jsou 16:9, nebo 4:3. Doporučené minimální rozlišení je {\sl 720p \nom{HD}{High Definition}} (High Definition), optimální {\sl 1080p \nom{FHD}{Full HD}} (Full HD), maximální {\sl 4k \nom{UHD}{Ultra HD}} (Ultra HD).
+
+\section{Facebook API}
+
+Hra \verb|trogASR| by také měla být kompetitivní. Proto byla zvolena integrace s facebookovým API. Tato zajišťuje, že chce-li uživatel soupeřit s ostatními, má jednoduchou možnost, jak se do aplikace přihlásit.
+
+V případě, že uživatel přihlašovací možnosti nevyužije, má i tak možnost hru hrát, nemůže se však umístit na žebříčcích. Aplikace jako taková na uživatelovu \uv{zeď} žádné příspěvky neodesílá --- uživatel může tuto volbu učinit sám pomocí \uv{Like}, nebo \uv{Share} tlačítek, které se mu taktéž implicitně nabízí. Není proto důvod, aby se uživatel do hry nepřihlásil. Navíc, na facebooková tlačítka jsou lidé poměrně zvyklí a nebojí se jich použít.
+
+Pro zapojení facebookových tlačítek do webové stránky nabízí Facebook poměrně jednoduché a přímočaré řešení\footnote{\url{https://developers.facebook.com/docs/javascript}}. Stačí do stránky umístit \verb|<div>| element, přiřadit mu příslušnou CSS třídu, zadefinovat příslušné {\sl data} atributy a natáhnout do stránky skript, který všechny tyto elementy přepíše elementy {\sl iframe}. Do těchto pak načte svá data a zobrazí je. Příkladem nastavení facebookových {\sl widgetů} budiž obrázek \ref{fig:template}.
+
+Velkou nevýhodou facebookových {\sl widgetů} je ale poměrně malá konfigurovatelnost. Obzvlášť co se týče nastavení velikostí tlačítek, neposkytuje API --- krom předdefinovaných {\sl small}, {\sl medium}, {\sl large} rozměrů --- žádné rozšiřující možnosti. Což v důsledku působí problém s ohledem na responzivní design aplikace. Je-li zobrazovací médium moc malé, tlačítka začnou \uv{vytékat} z přiřazených kontejnerů. Je-li naopak moc velké, tlačítka jsou titěrně malá.
+
+\section{Internacionalizace}
+
+Anglická zkratka \nom{I18N}{Internationalization} (Internationalization) je běžně používána pro označení částí systému, které jsou schopny přizpůsobit své chování (nebo toto přizpůsobení zajistit) dle volby uživatelského lokále. Aplikace \verb|trogASR| tento koncept přejímá a integruje.
+
+Každý zobrazovaný text, který má být internacionalizován, musí mít svůj lokalizační klíč. Pro každý klíč pak musí existovat překlady do všech podporovaných jazyků. Na překlady textů je možno přistupovat buďto skrze statickou proměnnou \verb|t| modulu I18N, kam se příslušné texty uloží vždy při změně lokále, nebo přes dynamickou \verb|getText([locale])| metodu, která na vstupu požaduje lokále, pro nějž se má text získat. V případě vynechání tohoto parametru metoda na klíči vrátí text pro současně nastavené lokále. Takže například text pro tlačítko {\sl play} lze získat buďto ze statického kontextu jako \verb|APP.I18N.t.MENU_PLAY|, nebo dynamicky jako \verb|APP.I18N.keys.MENU_PLAY.getText([locale])|.
+
+V současné době jsou v základu podporovány dva zobrazovací jazyky --- angličtina a čeština. Nastavení jazyka přepne kompletně celou aplikaci a vynutí tedy její reset.
+
+Zároveň je možno poměrně jednoduše v několika málo krocích přidat další zobrazovací jazyk. Je pro to potřeba:
+
+\begin{itemize}
+\item zavést nové lokále do souboru \verb|i18n.js| do příslušného výčtu s příslušnými zkratkami ({\sl en, cs, klingon, ...})
+\item přidat překlad pro každý lokalizační klíč v témže souboru
+\item poskytnout styly pro tlačítko na výběr nového lokále (viz obrázek \ref{fig:locale_style})
+\item pokud nový jazyk má ve své abecedě nějaké speciální znaky, je nutno poskytnout i tyto (viz obrázek \ref{fig:locale_letter})
+\end{itemize}
+
+O zbytek se postará jádro modulu I18N.
+\\
+\begin{figure}[h]
+	\verbatiminput{snip/locale_style.txt}
+	\caption{Příklad přidání stylu pro ikonu výběru jazyka \uv{klingon}.}
+	\label{fig:locale_style}
+\end{figure}
+
+\begin{figure}[h]
+	\verbatiminput{snip/locale_letter.txt}
+	\caption{Příklad přidání specifického znaku do abecedy nového jazyka a nastavení nového prvku obrázkového fontu.}
+	\label{fig:locale_letter}
+\end{figure}
+
+\subsection{Zdrojové a cílové jazyky překladu}
+
+Jelikož se hra \verb|trogASR| zaměřuje na překlad slov a frází z jazyka do jazyka, lze pochopitelně nastavit i dvojice zdrojový a cílový jazyk. Zdrojový jazyk je ten, ve kterém se uživateli budou slova a fráze zobrazovat, cílový naopak ten, ve kterém uživatel slova a fráze musí vyřknout.
+
+Platforma \verb|CloudASR| v současnosti rozumí pouze češtině a angličtině, proto cílovým jazykem musí být vždy jeden z nich. Nic však nebrání v zavedení nového zdrojového jazyka. Pro jeho přidání je potřeba:
+
+\begin{itemize}
+\item pokud zdrojový jazyk obsahuje speciální znaky, nutno přidat znak do obrázkového fontu (viz obrázek \ref{fig:locale_letter})
+\item zaregistrovat dvojici zdrojový - cílový jazyk v příslušném výčtu v modulu {\sl options} (viz obrázek \ref{fig:locale_options})
+\item přidat lokalizační klíč a překlady pro zobrazení výběru dvojice jazyků v nastavení do modulu I18N
+\item poskytnout slovník v \nom{CSV}{Comma Separated Values} (Comma Separated Values -- hodnoty oddělené čárkami) formátu, kde první slovo na každé řádce je slovo ve zdrojovém jazyce, ostatní hodnoty na řádce jsou významy slova v jazyce cílovém (\verb|vergh;car;vehicle|)
+\item naimportovat tento slovník do databáze za využití připravené funkcionality (viz obrázek \ref{fig:locale_import})
+\end{itemize}
+
+\begin{figure}[h]
+	\verbatiminput{snip/locale_options.txt}
+	\caption{Příklad zavedení dvojice \uv{klingon} - \uv{en} do modulu {\sl options}.}
+	\label{fig:locale_options}
+\end{figure}
+
+\begin{figure}[h]
+	\verbatiminput{snip/locale_import.txt}
+	\caption{Příklad importu slovníku \uv{klingon} $\rightarrow$ \uv{en}.}
+	\label{fig:locale_import}
+\end{figure}
+
+\section{Návrhové vzory}
+
+V aplikaci \verb|trogASR| je využita celá škála návrhových vzorů. Převážně byly tyto zapojovány pro zpřehlednění hektického a chaotického světa JS. Některé samospádem vyplývají z konceptu zpracování, některé jeden ze druhého. Následuje výčet a popis některých z nich.
+
+\subsection{Duck-typing}
+\label{ssec:ducktyping}
+
+\epigraph{\sl\uv{Pokud vidím ptáka, který chodí jako kachna, plave jako kachna a kváká jako kachna, tak o tomto ptáku tvrdím, že je to kachna.}}{--- James Whitcomb Riley}
+
+{\sl Duck-typing} (\nom{DT}{Duck-Typing}) je metoda dynamického typování objektů, při které zkoumáme objekt z hlediska jeho vlastností a ne z hlediska implementovaných rozhraní a předků. Tato metoda se chová podobně, jako kdybychom nějaké rozhraní vskutku implementovali, nemusíme tak však činit; stačí nám implementovat metody, které rozhraní udává.
+
+Zmíněný epigraf tedy není stoprocentně spojitelný s principem DT. Po drobné úpravě raději tvrdíme, že \uv{pokud vidím něco, co umí chodit, kvákat a plavat, pak věřím tomu, že je to kachna}.
+
+Důležité je pozorování, že stačí vidět \uv{něco}, a že poté \uv{věříme}, že to je daného typu. Kdybychom pomocí DT například hledali mezi dostupnými třídu \verb|Enemy| jako implementora metody \verb|engage()|, mohli bychom se velmi divit, kdybychom jako první našli třídu \verb|Girlfriend|.
+
+Jelikož JS je jazyk, který nezná koncept rozhraní, DT je jediná možnost, jak typovost zajistit. \verb|TrogASR| aplikace tuto možnost využívá při skládání modulárního systému.
+
+\subsection{Module pattern}
+
+{\sl Module pattern} je vzor určený pro organizaci JS aplikace. Zapouzdřuje vznik jednotlivých modulů do volání anonymní funkce, kde modul může vytvořit svou vnitřní strukturu. Ven pak vysouvá pouze API, které je s to poskytnout.
+
+Tímto postupem třímáme schopnost dostat do lokálního rámce globální proměnné, které by JS interpret jinak musel složitěji vyhledávat v celém kódu. Jednoduše je pošleme jako parametry tovární funkce. Máme takto postaráno o přehlednější strukturu a jsme vyzbrojeni alespoň částečnou ochranou proti injekci potenciálně škodlivého kódu.
+
+Aplikace \verb|trogASR| --- její prezentační část --- je na tomto vzoru celá postavena.
+
+\subsection{Scope cache pattern}
+
+Jelikož JS je jazyk s funkcionálními prvky, kde proměnná běžně může být typu funkce, musí znát princip {\sl scope} (rámec). Vnořené funkce mají vždy přehled o svém rámci a o v něm dostupných proměnných. Proto můžeme elegantně vytvářet statické funkce, které dokážou mít přístup do dynamického obsahu je obklopujícího.
+
+Tím, že zavádíme a vydáváme funkce, které s sebou nesou informaci o stavu svého tvůrce, lze obejít jindy nevyhnutelnou nutnost statického předávání konfigurační informace, nebo nutnost posílání extrémního množství funkčních argumentů.
+
+Tohoto vzoru aplikace \verb|trogASR| využívá poměrně nemálo; všude, kde lze. Exemplárním případem budiž generování statických \verb|getText()| metod na lokalizačních klíčích v I18N modulu, které se vždy při svém volání zařizují podle dynamické konfigurace modulu.
+
+\subsection{Singleton pattern}
+
+Název {\sl singleton pattern} vychází z matematické definice, která jako {\sl singleton} označuje množinu s právě jedním prvkem. V informatice se termínem {\sl singleton} označuje třída, jež se instancuje vždy maximálně jednou.
+
+Ve světě JS je tento vzor poměrně obvyklý. Často jsou zde využívány globální proměnné, kterými jsou objekty zrovna typu {\sl singleton}. Aplikace \verb|trogASR| v tomto ohledu není výjimkou a vzor využívá též. Aplikační moduly jsou všechny tohoto typu.
+
+\subsection{Currying}
+
+{\sl Currying}, česky také curryfikace, se jako termín poprvé objevuje v jazyce \verb|Haskell| a získal svůj název (stejně jako jazyk) podle amerického matematika a logika Haskella Curryho.
+
+Currifikace demonstruje základní paradigma funkcionálního programování. Jedná se o částečnou aplikaci funkce na parametry, kde výsledkem je opět funkce, která přijímá parametry dosud neaplikované. Obrázek \ref{fig:curry} ukazuje kontrast curryfikace v Haskellu a v JS.
+\\
+\begin{figure}[h]
+	\verbatiminput{snip/curry.txt}
+	\caption{Příklad curryfikace v Haskellu a v JS.}
+	\label{fig:curry}
+\end{figure}
+
+Curryfikace je v aplikaci \verb|trogASR| využito při zpracování templatů, kdy se nejprve vyrábí funkce, která template podle vstupu částečně upraví, a teprve poté se tato aplikuje na příchozí data.
+
+\subsection{MVC pattern}
+
+\nom{MVC}{Model-View-Controller} (Model-View-Controller) je jediný návrhový vzor, který byl využit v aplikaci \verb|trogASR| na {\sl back-end}u (serverové části). Není však pravidlem, že by MVC vzor měl být pouze tam. Například {\sl front-end} framework \verb|ExtJS| od verze 5.0 přináší možnost nasazení MVC i na prezentační vrstvě.
+
+MVC vzor diktuje rozdělení aplikace na tři části --- datový {\sl model}, uživatelské rozhraní ({\sl view}) a řídící logiku ({\sl controller}) --- tak, aby modifikace kterékoli této části měla minimální vliv na části ostatní. Vpravdě se nejedná ani tak o vzor návrhový, jako spíše o vzor architektonický (někdy také agregační). Týká se totiž výrazněji architektury aplikace, než-li klasické vzory návrhové.
+
+\verb|Flask| {\sl microframework} tento vzor implicitně podporuje. Proto bylo jeho nasazení více, než žádoucí. Vzor je navíc podpořen specifickou strukturalizací zdrojového kódu.

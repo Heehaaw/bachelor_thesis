@@ -1,0 +1,16 @@
+// app.js
+var APP = APP || {};
+(function($, window, app) {
+    var registerComponent = function(cmp) {
+        // Add the cmp to the process chain
+    };
+    var reset = function() {
+        // Call reset() on every registered component
+    };
+    var initialize = function() {
+        // Call initComponent() on every registered component
+    };
+    $(window).load(initialize);
+    app.registerComponent = registerComponent;
+    app.reset = reset;
+})(jQuery, window, APP);

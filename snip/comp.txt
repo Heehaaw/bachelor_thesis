@@ -1,0 +1,8 @@
+// i18n.js
+(function($, ns) {
+    var i18n = {
+        initComponent: function() {/* prepare stuff */},
+        reset: function() {/* reset stuff */}
+    };
+    ns.I18N = ns.registerComponent(i18n);
+})(jQuery, APP);

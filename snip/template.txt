@@ -1,0 +1,23 @@
+<!-- facebookWidget.html -->
+<script type="text/html" id="tpl_fbWidget">
+    <div id="<%=id%>" class="<%=widgetType%>"
+    <% for(var name in data) { %>
+        data-<%=name%>="<%=data[name]%>"
+    <% } %> >
+    </div>
+</script>
+
+----------
+
+// facebook.js
+var htmlBuffer = APP.TEMPLATES.process('tpl_fbWidget', {
+        widgetType: widgets.LIKE.type,
+        data: widgets.LIKE.data
+    }
+);
+htmlBuffer += APP.TEMPLATES.process('tpl_fbWidget', {
+        widgetType: widgets.LOGIN.type,
+        data: widgets.LOGIN.data
+    }
+);
+$('#fbHolder').append(htmlBuffer);

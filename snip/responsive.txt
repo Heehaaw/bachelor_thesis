@@ -1,0 +1,15 @@
+<!-- index.html -->
+<div id="letter-metrics"></div>
+
+----------
+
+/* font.css */
+#letter-metrics { width: 3%; display: none; }
+
+----------
+
+// spriteFactory.js
+var letterSize;
+var initComponent = function() {
+    letterSize = $(#letter-metrics).width();
+};

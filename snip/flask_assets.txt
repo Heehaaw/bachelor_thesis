@@ -4,7 +4,9 @@
 
 #hello.py
 from flask.ext.assets import Environment, Bundle
+
 # ... Flask app initialization and setup
+
 assets = Environment(app)
 bundles = {
     'all-css': Bundle(
@@ -15,6 +17,7 @@ bundles = {
         output='gen/all.js', filters='jsmin')
 }
 assets.register(bundles)
+
 # Flask app run ...
 
 ----------
