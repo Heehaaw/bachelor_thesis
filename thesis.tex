@@ -39,6 +39,7 @@
 \usepackage{amsmath}
 \usepackage{epigraph}
 \usepackage{verbatim}
+\usepackage{dirtree}
 
 %% Balíček hyperref, kterým jdou vyrábět klikací odkazy v PDF,
 %% ale hlavně ho používáme k uložení metadat do PDF (včetně obsahu).
@@ -82,7 +83,9 @@
 \setlength{\nomitemsep}{-\parsep}
 \def\printnom#1{
 	\renewcommand{\nomname}{#1}
-	\printnomenclature[2cm]
+	\renewcommand{\baselinestretch}{1.2}\normalsize
+	\printnomenclature[3cm]
+	\renewcommand{\baselinestretch}{1.5}\normalsize
 }
 
 \def\nom#1#2{#1\nomenclature{#1}{#2}}
@@ -267,7 +270,9 @@ automatic speech recognition, ASR, games, web, HTML5, Javascript
 \openright
 \pagestyle{plain}
 \setcounter{page}{1}
+\renewcommand{\baselinestretch}{1.25}\normalsize
 \tableofcontents
+\renewcommand{\baselinestretch}{1.5}\normalsize
 
 %%% Jednotlivé kapitoly práce jsou pro přehlednost uloženy v samostatných souborech
 \include{0_intro}
@@ -275,14 +280,12 @@ automatic speech recognition, ASR, games, web, HTML5, Javascript
 \include{2_e-learning}
 \include{3_technologies}
 \include{4_solution}
-
-% Ukázka použití některých konstrukcí LateXu (odkomentujte, chcete-li)
-%\include{X_example}
-
 \include{5_conclusion}
 
 %%% Seznam použité literatury
+\renewcommand{\baselinestretch}{1.1}\normalsize
 \include{6_literature}
+\renewcommand{\baselinestretch}{1.5}\normalsize
 
 %%% Tabulky v bakalářské práci, existují-li.
 %\chapwithtoc{Seznam tabulek}
@@ -293,7 +296,7 @@ automatic speech recognition, ASR, games, web, HTML5, Javascript
 %%% Přílohy k bakalářské práci, existují-li (různé dodatky jako výpisy programů,
 %%% diagramy apod.). Každá příloha musí být alespoň jednou odkazována z vlastního
 %%% textu práce. Přílohy se číslují.
-\chapwithtoc{Přílohy}
+\include{7_appendices}
 
 \openright
 \end{document}

@@ -1,4 +1,5 @@
 \chapter{Implementace}
+\label{chap:solution}
 
 V této kapitole se čtenář dočte o implementaci aplikace \verb|trogASR|. Bude obeznámen s pilíři aplikace, nahlédne na vývoj aplikace jako na řešení komplexní, i po částech.
 
@@ -131,7 +132,7 @@ Platforma \verb|CloudASR| v současnosti rozumí pouze češtině a angličtině
 \item pokud zdrojový jazyk obsahuje speciální znaky, nutno přidat znak do obrázkového fontu (viz obrázek \ref{fig:locale_letter})
 \item zaregistrovat dvojici zdrojový - cílový jazyk v příslušném výčtu v modulu {\sl options} (viz obrázek \ref{fig:locale_options})
 \item přidat lokalizační klíč a překlady pro zobrazení výběru dvojice jazyků v nastavení do modulu I18N
-\item poskytnout slovník v \nom{CSV}{Comma Separated Values} (Comma Separated Values -- hodnoty oddělené čárkami) formátu, kde první slovo na každé řádce je slovo ve zdrojovém jazyce, ostatní hodnoty na řádce jsou významy slova v jazyce cílovém (\verb|vergh;car;vehicle|)
+\item poskytnout slovník v \nom{CSV}{Comma Separated Values} (Comma Separated Values -- hodnoty oddělené čárkami) formátu, kde první slovo na každé řádce je slovo ve zdrojovém jazyce, ostatní hodnoty na řádce jsou významy slova v jazyce cílovém (\verb|vergh;car;vehicle;starship|)
 \item naimportovat tento slovník do databáze za využití připravené funkcionality (viz obrázek \ref{fig:locale_import})
 \end{itemize}
 
@@ -149,7 +150,7 @@ Platforma \verb|CloudASR| v současnosti rozumí pouze češtině a angličtině
 
 \section{Návrhové vzory}
 
-V aplikaci \verb|trogASR| je využita celá škála návrhových vzorů. Převážně byly tyto zapojovány pro zpřehlednění hektického a chaotického světa JS. Některé samospádem vyplývají z konceptu zpracování, některé jeden ze druhého. Následuje výčet a popis některých z nich.
+V aplikaci \verb|trogASR| je využita celá škála návrhových vzorů. Převážně byly tyto zapojovány pro zpřehlednění hektického a chaotického světa JS. Některé samospádem vyplývají z konceptu zpracování, některé jeden ze druhého. Každý je však unikátní a důležitý svým vlastním způsobem. Následuje výčet a popis některých z nich.
 
 \subsection{Duck-typing}
 \label{ssec:ducktyping}
@@ -191,7 +192,7 @@ Ve světě JS je tento vzor poměrně obvyklý. Často jsou zde využívány glo
 {\sl Currying}, česky také curryfikace, se jako termín poprvé objevuje v jazyce \verb|Haskell| a získal svůj název (stejně jako jazyk) podle amerického matematika a logika Haskella Curryho.
 
 Currifikace demonstruje základní paradigma funkcionálního programování. Jedná se o částečnou aplikaci funkce na parametry, kde výsledkem je opět funkce, která přijímá parametry dosud neaplikované. Obrázek \ref{fig:curry} ukazuje kontrast curryfikace v Haskellu a v JS.
-\\
+
 \begin{figure}[h]
 	\verbatiminput{snip/curry.txt}
 	\caption{Příklad curryfikace v Haskellu a v JS.}
@@ -201,8 +202,9 @@ Currifikace demonstruje základní paradigma funkcionálního programování. Je
 Curryfikace je v aplikaci \verb|trogASR| využito při zpracování templatů, kdy se nejprve vyrábí funkce, která template podle vstupu částečně upraví, a teprve poté se tato aplikuje na příchozí data.
 
 \subsection{MVC pattern}
+\label{ssec:mvc}
 
-\nom{MVC}{Model-View-Controller} (Model-View-Controller) je jediný návrhový vzor, který byl využit v aplikaci \verb|trogASR| na {\sl back-end}u (serverové části). Není však pravidlem, že by MVC vzor měl být pouze tam. Například {\sl front-end} framework \verb|ExtJS| od verze 5.0 přináší možnost nasazení MVC i na prezentační vrstvě.
+MVC (Model-View-Controller) je jediný návrhový vzor, který byl využit v aplikaci \verb|trogASR| na {\sl back-end}u (serverové části). Není však pravidlem, že by MVC vzor měl být pouze tam. Například {\sl front-end} framework \verb|ExtJS| od verze 5.0 přináší možnost nasazení MVC i na prezentační vrstvě.
 
 MVC vzor diktuje rozdělení aplikace na tři části --- datový {\sl model}, uživatelské rozhraní ({\sl view}) a řídící logiku ({\sl controller}) --- tak, aby modifikace kterékoli této části měla minimální vliv na části ostatní. Vpravdě se nejedná ani tak o vzor návrhový, jako spíše o vzor architektonický (někdy také agregační). Týká se totiž výrazněji architektury aplikace, než-li klasické vzory návrhové.
 

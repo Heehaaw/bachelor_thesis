@@ -1,9 +1,9 @@
 -- Haskell
-ghc> let add x y = x + y    -- add :: (Num a) => a -> a -> a
-ghc> add 2 3
+ghc>let add x y = x + y    -- add :: (Num a) => a -> a -> a
+ghc>add 2 3
 5
-ghc> let addTwo = add 2
-ghc> addTwo 3
+ghc>let addTwo = add 2
+ghc>addTwo 3
 5
 
 ----------
