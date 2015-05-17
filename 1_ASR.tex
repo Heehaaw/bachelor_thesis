@@ -6,9 +6,9 @@ Nejprve se čtenář dočte o tom, co to vlastně ASR je, poté jak ASR probíh�
 
 \section{Co je to ASR}
 
-ASR je teoretický model, založený na pravděpodobnostních vlastnostech akustických pozorování, který formalizuje převod mluveného slova do textu. Přeneseně se takto označují i konkrétní systémy a implementace, které tohoto modelu využívají. 
+Moderní ASR využívá teoretický model, založený na pravděpodobnostních vlastnostech akustických pozorování, který formalizuje převod mluveného slova do textu. Přeneseně se takto označují i konkrétní systémy a implementace, které tohoto modelu využívají. 
 
-Ultimátním cílem  je získat systém, který bude v reálném čase převádět přirozenou lidskou řeč na text se stoprocentní úspěšností pro všechna slova, nezávisle na zkreslení vstupních zařízení, okolním ruchu, nebo přízvuku mluvčích. Již v minulosti ASR systémy dosahovaly i kolem devadesátiprocentní úspěšnosti \cite{jelinek_1976}. Nyní lze nalézt systémy s úspěšností i větší, hlavně však systémy optimalizovanější a výkonnější.
+Ultimátním cílem  je získat systém, který bude v reálném čase převádět přirozenou lidskou řeč na text se stoprocentní úspěšností pro všechna slova, nezávisle na zkreslení vstupních zařízení, okolním ruchu, nebo přízvuku mluvčích. Již v minulosti ASR systémy dosahovaly i kolem devadesátiprocentní úspěšnosti \cite{jelinek_1976}.
 
 \section{Postup rozpoznávání}
 
@@ -31,87 +31,17 @@ Zásadními milníky systému jsou:
 
 \section{Reprezentace a zpracování signálu}
 
-Pro reprezentaci a zpracování signálu se běžně využívají dva druhy analýzy -- analýza pomocí {\sl discrete-time} Fourierovy transformace (\nom{DTFT}{Discrete-Time Fourier Transform}) a Cepstrální analýza (\nom{CA}{Cepstral Analysis}).
+Pro reprezentaci a zpracování signálu se dříve běžně využívaly dva druhy analýzy -- analýza pomocí {\sl discrete-time} Fourierovy transformace (\nom{DTFT}{Discrete-Time Fourier Transform}) a její důsledek -- Cepstrální analýza (\nom{CA}{Cepstral Analysis}). Dnes se pro tyto účely využívá pro změnu důsledků druhé zmíněné metody v podobě \nom{MFCC}{Mel-frequency cepstral coefficients} (Mel-Frequency Cepstral Coefficients) analýzy.
 
-\subsection{Fourierovská analýza}
+Všechny tyto metody se snaží zachytit příznaky v signálu, které lze dále využít pro jeho zpracování.
 
-{\sl Discrete-time Fourierova transformace} je vztah:
-%
-\begin{align}
-	\label{eq:dtft}
-	X(e^{j\omega}) &= \sum\limits_{n=-\infty}^{+\infty} x[n] e^{-j\omega n}\\
-	          x[n] &= \frac{1}{2\pi} \int_{-\pi}^{\pi} X(e^{j\omega})e^{j\omega n} d\omega
-\end{align}
-%
-jemuž pro konvergenci postačuje podmínka:
-%
-\begin{equation}
-	\label{eq:dtft_conv}
-	\sum\limits_{n=-\infty}^{+\infty} |x[n]| < +\infty
-\end{equation} 
+Fourierovská analýza je prvotním způsobem, jak signál zpracovat a reprezentovat. Původně se využívalo vztahu DTFT samotného, posléze již i jeho dalšího zpracování \cite{shaug_2003}.
 
-Ačkoli je $x[n]$ diskrétní, $X(e^{j\omega})$ je spojitá, $2\pi$-periodická a pro její dualitu platí:
-%
-\begin{align}
-	\label{eq:dtft_d}
-	          y[n] &= x[n] * h[n]\\
-	Y(e^{j\omega}) &= X(e^{j\omega})H(e^{j\omega})
-\end{align}
-%
-a
-%
-\begin{align}
-	          y[n] &= x[n]w[n]\\
-	Y(e^{j\omega}) &= \frac{1}{2\pi} \int_{-\pi}^{\pi} W(e^{j\theta})X(e^{j(\omega - \theta)})d\theta
-\end{align}
-
-V důsledku můžeme zavést {\sl short-time} fourierovskou analýzu (\nom{STFA}{Short-Time Fourier Analysis} -- Short-Time Fourier Analysis) jako:
-%
-\begin{equation}
-	\label{eq:stfa}
-	X_n(e^{j\omega}) = \sum\limits_{m=-\infty}^{+\infty} w[n-m]x[m]e^{-j\omega m}
-\end{equation}
-%
-a v případě, že $X(e^{j\omega})$ representuje DTFT signálu, který pokračuje i mimo okno brané v potaz (nebo je tam konstantní nula), můžeme psát, že:
-%
-\begin{equation}
-	\label{eq:stfa_f}
-	X_n(e^{j\omega}) = \frac{1}{2\pi} \int_{-\pi}^{\pi} W(e^{j\theta})e^{j\theta n}X(e^{j(\omega + \theta)})d\theta
-\end{equation}
-
-\subsection{Cepstrální analýza}
-
-Původně CA vznikla jako nástroj analýzy časového rozvoje seismických signálů vzniklých zemětřeseními, či explozemi. Měla pomoci nalézt především hloubku generátoru seismických signálů analýzou odezvy těchto signálů \cite{bogert_1963}.
+Je zajímavé, že CA vznikla jako nástroj analýzy časového rozvoje seismických signálů vzniklých zemětřeseními, či explozemi. Měla pomoci nalézt především hloubku generátoru seismických signálů analýzou odezvy těchto signálů \cite{bogert_1963}.
 
 CA využívá předpokladu, že signál je výstup lineárního časově invariantního (\nom{LTI}{Linear Time-Invariant} -- Linear Time-Invariant) systému; tedy že je to konvoluce vstupu a impulsové odezvy. Pokud se chceme zabývat charakterizací tohoto modelu, musíme projít procesem dekonvoluce. A CA je právě postup, využívaný pro takovouto LTI dekonvoluci \cite{tohkura_1987}.
 
-Vezmeme-li v potaz pozorování, že:
-%
-\begin{equation}
-	\label{eq:ca_obs}
-	x[n] = x_1[n] * x_2[n] \iff X(z) = X_1(z) X_2(z)
-\end{equation}
-%
-a vyjádříme-li komplexní logaritmus $X(z)$ jako:
-%
-\begin{equation}
-	\label{eq:ca_l}
-	\widehat{X}(z) = \log X(z) = \log X_1(z) + \log X_2(z)
-\end{equation}
-%
-pak pokud je tento logaritmus jednoznačný a $\widehat{X}(z)$ je validní z-transformace, jsou nové konvolvované signály aditivní v této nové cepstrální doméně:
-%
-\begin{equation}
-	\label{eq:ca_xl}
-	\widehat{x}(n) = \widehat{x}_1(n) + \widehat{x}_2(n)
-\end{equation}
-
-Pokud se navíc omezíme na jednotkovou kružnici $z = e^{j\omega}$, pak cepstrální transformací označujeme:
-%
-\begin{equation}
-	\label{eq:ca_f}
-	\widehat{X}(e^{j\omega}) = \log |X(e^{j\omega})| + j \arg X(e^{j\omega})
-\end{equation}
+MFCC iteruje na principu CA, především se soustředí na přiblížení principu CA lidskému konceptu vnímání tím, že rozprostírá frekvence na mel stupnici ({\sl mel scale}) \cite{hossan_2010}.
 
 \section{Zdroje omezení mluvené komunikace}
 
@@ -122,7 +52,7 @@ Práci už tak nepříjemnou nezlehčuje ani fakt, že omezení nejsou konstantn
 Patří sem například:
 
 \begin{itemize}
-\item Akustická omezení -- lidský hlasový aparát trpí, jako každý jiný komplexní systém, také svými neduhami
+\item Akustická omezení -- lidský hlasový aparát trpí, jako každý jiný komplexní systém, také svými neduhami (vrozené vady aparátu, variabilita ústní klenby, velikost ústního otvoru, ...)
 \item Fonetická omezení -- \uv{kolemjdoucí paní} - \uv{kolem jdou cíp a ní}
 \item Fonologická omezení -- například splynutí \uv{s} a \uv{š} do jednoho dlouhého fonému - \uv{lezeš shora}
 \item Fonotaktická omezení -- kupříkladu zjednodušení konsonantických shluků u menších dětí (\uv{uličnice} - \uv{ulitite}), nebo nesmyslná, rádoby přejatá slova (\uv{sympathetic} - \uv{sympatetický})
@@ -132,6 +62,10 @@ Patří sem například:
 \end{itemize}
 
 a mnohá další.
+
+Často také mluvíme o specifikách mluvčího. Každý je svým způsobem unikátní, jeho hlas je taktéž. Navíc, jedincův hlas se může různit od sebe samého i v důsledku únavy, nemoci, nebo psychického rozpoložení.
+
+Nejčastěji však bojujeme s nepřízní okolí a nepřesností prostředků záznamu zvuku. Výrazný šum na pozadí a špatně zvolené zařízení a technologie záznamu zvuku dokáží nejednomu ASR systému pěkně zavařit.
 
 \section{Modelování systému}
 
@@ -230,49 +164,25 @@ Buď jak buď, {\sl bigramy} stále zachovávají svou pozici v modelování jaz
 
 Modelováním akustiky můžeme naopak získat nástroj pro zachycení a vypořádání se například s akustickým šumem, se zkreslením vstupního zařízení, či s netradičním přízvukem mluvčího.
 
-Akustický model statisticky reprezentuje zvuky, jenž poskládány dohromady tvoří vyřčené slovo. Každé takovéto statistické reprezentaci může být přiřazena nálepka ji reprezentující (běžně foném). Aby model mohl poskytovat rozumné výsledky, je potřeba jej nejprve natrénovat na nějakém jazykovém korpusu, například pro tento účel lze využít Baum-Welchova trénovacího algoritmu \cite{han_2003}.
+Akustický model statisticky reprezentuje zvuky, jenž poskládány dohromady tvoří vyřčené slovo. Každé takovéto statistické reprezentaci může být přiřazena nálepka ji reprezentující (běžně foném).
 
-Skryté Markovovy modely (\nom{HMM}{Hidden Markov Model}s -- Hidden Markov Models) \cite{poritz_1988} jsou jednou z možných interpretací akustického modelu (jiné interpretace mohou zahrnovat například neuronové sítě \cite{kingsbury_2009}, nebo {\sl dynamic time warping} \cite{tarar_2010}).
+Skryté Markovovy modely (\nom{HMM}{Hidden Markov Model}s -- Hidden Markov Models) \cite{poritz_1988} jsou jednou z možných interpretací akustického modelu. Při použití HMMs jeden HMM reprezentuje každý foném, slova vznikají konkatenací menších HMMs, věty na oplátku konkatenací těchto HMMs a tak dále.
 
-Při použití HMMs jeden HMM reprezentuje každý foném, slova vznikají konkatenací menších HMMs, věty na oplátku konkatenací těchto HMMs a tak dále.
+Jiné interpretace mohou zahrnovat například neuronové sítě \cite{kingsbury_2009}, nebo {\sl dynamic time warping} \cite{tarar_2010}.
 
-Proč zrovna \uv{skrytý} Markovův model? Tento název vychází z definice \uv{skrytého} Markovova procesu (\nom{HMP}{Hidden Markov Process} -- Hidden Markov Process), který popíšeme za pomoci kolegů Alibaby a Rychlonožky a jejich uren. 
-
-Vezměme myšlenkový experiment, kde v místnosti za zavřenými dveřmi žije Alibaba se třemi svými urnami $u_1, u_2, u_3$. Každá urna obsahuje známou množinu kuliček $\{k_{u_i}\}_1^n$, kde platí $(\forall u \in \{u_1, u_2, u_3\})(\forall j \in \{1,\dots,n\})(k_{uj} \in \{c_1,\dots,c_n\})$, tedy každá kulička z každé urny je jedné z barev $c$. Alibaba bude nyní ďábelským způsobem tahat kuličky z uren, a sice tak, že $l$-tou kuličku $K_l$  vytáhne náhodně a pouze s ohledem na $K_{l-1}$. Tomuto procesu se říká Markovův proces. Jelikož Alibaba na běhání nikdy nebyl, dá taženou $K_l$ Rychlonožkovi, který vyběhne ven dveřmi a složí $K_l$ k nohám nezávislého pozorovatele, hned vedle kuličky $K_{l-1}$ do řady.
-
-Pozorovatel sice zná složení kuliček v urnách, ale nemá ani tušení, co se za dveřmi děje --- Markovův proces je skrytý --- takže může pouze smutně sledovat sekvenci kuliček, rodící se mu pod nohama. Po $1<m<n$ tazích a Rychlonožkovo sprintech bude mít pozorovatel v zorném poli posloupnost kuliček $K_1^m$. Problém ale nastává, chce-li pozorovatel určit z jaké urny byla tažena $K_m$. Ani v případě, že $(\exists i \in \{1, 2, 3\})(K_1^m \subseteq \{k_{u_i}\}_1^m)$ si totiž nemůže být jist.
-
-Nicméně, pozorovatel se může alespoň pokusit odhadnout pravděpodobnost, že $K_m$ byla z urny $i$, což se právě HMMs pokouší zachytit.
+Aby model mohl poskytovat rozumné výsledky, je potřeba jej nejprve natrénovat na nějakém jazykovém korpusu, například pro tento účel lze využít Baum-Welchova trénovacího algoritmu \cite{han_2003}, nebo Viterbiho trénovacího algoritmu \cite{franzini_1990}.
 
 \subsection{Lexikální modely}
 
 Lexikální modely popisují vztah mezi jednotkami akustickými (fonémy -- části slova mluveného, popsané akustickými modely) a lexikálními (lexémy -- množina všech tvarů určitého slova, nebo jeho části). 
 
-Pro ilustraci lexému vezměme slova \uv{ředkvička} a \uv{ředkvičky}; mají rozdílné gramatické a sémantické významy (singulár a plurál téhož), lexikální význam je ale stejný (malý, načervenalý, jedlý kořen). 
+Pro ilustraci lexému vezměme slova \uv{ředkvička} a \uv{ředkvičky}; mají rozdílné gramatické významy (singulár a plurál téhož), sémantický význam je ale stejný (malý, načervenalý, jedlý kořen). 
 
 Jednou z výzev navrhování ASR systému je popsat tyto vztahy pro jazyk, kde lexikální příznaky nejsou zcela zřejmé. Jak ale \cite{rasipuram_2014} uvádí, pro standardní stochastické HMM ASR systémy existuje lexikální model deterministický, tj. existuje bijektivní zobrazení mezi trénovanými HMMs a lexémy.
 
 Pro jazyky obtížné, s ne zcela formálními lexikálními příznaky, lze lexikální model odvodit z některého lexikálního modelu již známého -- aplikací známého modelu na nový jazyk a jeho postupnou adaptací.
 
-Zavedeme-li $\Theta = \{\Theta_A, \Theta_L\}$ množinu parametrů akustických a jazykových modelů, kde $\Theta_A = \{\theta_a, \theta_pr, \theta_l\}$ jsou parametry akustického modelu, respektive lexikonu, respektive lexikálního modelu, můžeme s využitím \ref{eq:map} a \ref{eq:bayes} rozvést:
-%
-\begin{align}
-	\label{eq:lm}
-	W^* &= \arg \max_W P(W|A, \Theta)\\
-	    &= \arg \max_W \frac{P(A|W, \Theta_A)P(W|\Theta_L)}{P(A|\Theta)}\\
-	    &= \arg \max_W P(A|W, \Theta_A)P(W|\Theta_L)
-\end{align}
-
-Hledání nejpravděpodobnější sekvence $W^*$ pro akustický vstup $A$ pak můžeme díky lexikálnímu modelování transformovat na problém hledání nejpravděpodobnější posloupnosti stavů $Q^*$:
-%
-\begin{align}
-	\label{eq:lm_state}
-	Q^* &= \arg \max_Q P(Q,A|\Theta)\\
-	    &= \arg \max_Q \prod\limits_{t=1}^T p(a_t|q_t = l^i, \Theta_A) P(q_t = l^i|q_{t-1} = l^i, \Theta)\\
-	    &= \arg \max_Q \sum\limits_{t=1}^T (\log p(a_t|q_t = l^i, \Theta_A) + \log P(q_t = l^i|q_{t-1} = l^i, \Theta)) 
-\end{align}
-%
-kde $T$ je celkový počet uvažovaných oken, $Q = \{q_1,\dots,q_t\}$ jde přes všechny posloupnosti možných HMM stavů, $q_t \in \{l^1,\dots,l^i,\dots,l^I\}$ a $I$ značí počet lexémů. Obvykle je výraz $\log p(a_t|q_t = l^i, \Theta_A)$ označován jako {\sl lokální emisní skóre} (\nom{LES}{Local Emission Score} -- Local Emission Score) a výraz $\log P(q_t = l^i|q_{t-1} = l^i, \Theta)$ jako {\sl přechodové skóre} (\nom{TS}{Transition Score} -- Transition Score).
+Pro lexikální modelování je velmi důležitým nástrojem fonetická transkripce, která je vizuální reprezentací jednotlivých fonémů pomocí grafémů. Transkripce různých jazyků se poté sdružují do fonetických (výslovnostních) slovníků, jenž jsou využívány jako trénovací data lexikálních modelů \cite{haili_2013}. 
 
 \section{Hodnocení výstupů ASR}
 
@@ -313,4 +223,20 @@ kde
 \item $D$ je počet vypuštěných slov
 \item $I$ je počet vložení nových slov
 \item $N$ je počet slov v referenční sekvenci
+\end{itemize}
+
+\section{Dostupné nástroje}
+
+Jelikož ASR technologie jsou dnes již poměrně pokročilé, lze nalézt i poměrně široké spektrum nástrojů pro automatické rozpoznávání řeči, ať už vyvíjených na akademické půdě, nebo jako {\sl open-source}.
+\newpage
+Těmi jsou například:
+\begin{itemize}
+\item \nom{HTK}{Hidden Markov Toolkit} (Hidden Markov Toolkit)\footnote{\url{http://htk.eng.cam.ac.uk/}} vyvíjený na Cambridgeské universitě
+\item \verb|Kaldi|\footnote{\url{http://kaldi.sourceforge.net/}}
+\item \verb|RWTH ASR|\footnote{\url{http://www-i6.informatik.rwth-aachen.de/rwth-asr/}} vyvíjený na universitě v Cáchách
+\item \verb|Open-Julius|\footnote{\url{http://julius.osdn.jp/en_index.php}}
+\item \verb|CMU Sphinx|\footnote{\url{http://cmusphinx.sourceforge.net/}}
+\item \verb|Nuance|\footnote{\url{http://www.nuance.com/for-developers/dragon/index.htm}}
+\item \verb|Google Speech|\footnote{\url{https://www.google.com/intl/en/chrome/demos/speech.html}}
+\item a samozřejmě \verb|CloudASR|\footnote{\url{http://www.cloudasr.com/}}.
 \end{itemize}
