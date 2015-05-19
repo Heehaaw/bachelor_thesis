@@ -31,11 +31,11 @@ Zásadními milníky systému jsou:
 
 \section{Reprezentace a zpracování signálu}
 
-Pro reprezentaci a zpracování signálu se dříve běžně využívaly dva druhy analýzy -- analýza pomocí {\sl discrete-time} Fourierovy transformace (\nom{DTFT}{Discrete-Time Fourier Transform}) a její důsledek -- Cepstrální analýza (\nom{CA}{Cepstral Analysis}). Dnes se pro tyto účely využívá pro změnu důsledků druhé zmíněné metody v podobě \nom{MFCC}{Mel-frequency cepstral coefficients} (Mel-Frequency Cepstral Coefficients) analýzy.
+Pro reprezentaci a zpracování signálu se dříve běžně využívaly dva druhy analýzy -- analýza pomocí {\sl discrete-time} Fourierovy transformace (\nom{DTFT}{Discrete-Time Fourier Transform}) a Cepstrální analýza (\nom{CA}{Cepstral Analysis}). Dnes se pro tyto účely využívá zejména varianta CA implementovaná jako \nom{MFCC}{Mel-frequency cepstral coefficients} (Mel-Frequency Cepstral Coefficients) \cite{sahi_2012}.
 
-Všechny tyto metody se snaží zachytit příznaky v signálu, které lze dále využít pro jeho zpracování.
+Všechny tyto metody se snaží zachytit příznaky v signálu, které lze dále využít pro jeho rozpoznání.
 
-Fourierovská analýza je prvotním způsobem, jak signál zpracovat a reprezentovat. Původně se využívalo vztahu DTFT samotného, posléze již i jeho dalšího zpracování \cite{shaug_2003}.
+Fourierovská analýza je prvotním způsobem, jak signál zpracovat a reprezentovat. Je to způsob, jak signálovou funkci vyjádřit (či aproximovat) funkcemi jednoduššími (trigonometrickými). DTFT je jedna z forem Fourierovské analýzy, která je aplikovatelná na rovnoměrně navzorkovanou spojitou funkci (proto mluvíme o diskrétním čase). DTFT tedy lze velmi dobře aplikovat na digitální zvuková data, jelikož tato jsou právě uniformní vzorky spojité funkce zvukového signálu. V počátcích ASR byla pro reprezentaci zvukových dat využívána pouze frekvenční spektra, jež jsou produktem DTFT \cite{shaug_2003}.
 
 Je zajímavé, že CA vznikla jako nástroj analýzy časového rozvoje seismických signálů vzniklých zemětřeseními, či explozemi. Měla pomoci nalézt především hloubku generátoru seismických signálů analýzou odezvy těchto signálů \cite{bogert_1963}.
 
@@ -65,7 +65,7 @@ a mnohá další.
 
 Často také mluvíme o specifikách mluvčího. Každý je svým způsobem unikátní, jeho hlas je taktéž. Navíc, jedincův hlas se může různit od sebe samého i v důsledku únavy, nemoci, nebo psychického rozpoložení.
 
-Nejčastěji však bojujeme s nepřízní okolí a nepřesností prostředků záznamu zvuku. Výrazný šum na pozadí a špatně zvolené zařízení a technologie záznamu zvuku dokáží nejednomu ASR systému pěkně zavařit.
+Nejčastěji však bojujeme s nepřízní okolí a nepřesností prostředků záznamu zvuku. Výrazný šum na pozadí a špatně zvolené zařízení a technologie záznamu zvuku dokáží nejednomu ASR systému znemožnit korektní rozpoznávání.
 
 \section{Modelování systému}
 
@@ -168,7 +168,59 @@ Akustický model statisticky reprezentuje zvuky, jenž poskládány dohromady tv
 
 Skryté Markovovy modely (\nom{HMM}{Hidden Markov Model}s -- Hidden Markov Models) \cite{poritz_1988} jsou jednou z možných interpretací akustického modelu. Při použití HMMs jeden HMM reprezentuje každý foném, slova vznikají konkatenací menších HMMs, věty na oplátku konkatenací těchto HMMs a tak dále.
 
-Jiné interpretace mohou zahrnovat například neuronové sítě \cite{kingsbury_2009}, nebo {\sl dynamic time warping} \cite{tarar_2010}.
+HMM bývá typicky zapsán jako $\lambda = \{\mathcal{X}, \mathcal{Y}, \pi\}$, kde:
+
+\begin{itemize}
+\item $N$ je počet stavů v modelu
+	\begin{itemize}
+	\item stavy $\mathcal{S} = \{s_1,\dots,s_N\}$
+	\item $q_t \in \mathcal{S}$ stav v čase $t$
+	\end{itemize}
+\item $M$ je počet diskrétních pozorování
+	\begin{itemize}
+	\item pozorování $\mathcal{O} = \{o_1,\dots,o_M\}$
+	\item $a_t \in \mathcal{O}$ pozorování v čase $t$
+	\end{itemize}
+\item $\mathcal{X} = \{x_{i,j}\}$ je rozdělení pravděpodobnosti přechodové funkce mezi stavy
+	\begin{itemize}
+	\item $x_{i,j} = P(q_{t+1} = s_j | q_t = s_i),\; 1 \le i, j \le N$
+	\end{itemize}
+\item $\mathcal{Y} = \{y_j(k)\}$ je rozdělení pravděpodobnosti pozorování symbolu ve stavu $j$
+	\begin{itemize}
+	\item $y_j(k) = P(o_k\;\text{v čase}\;t|q_t = s_j),\; 1 \le j \le N, 1 \le k \le M$
+	\end{itemize}
+\item $\pi = \{\pi_i\}$ počáteční rozložení stavů
+	\begin{itemize}
+	\item $\pi_i = P(q_1 = s_i),\; 1 \le i \le N$
+	\end{itemize}
+\end{itemize}
+
+Výpočet pravděpodobnosti $P(A|W)$ ze vztahu \ref{eq:map2} můžeme pak pro $A = \{a_1,\dots,a_T\}$ transformovat na výpočet $P(A|\lambda)$ a napsat:
+%
+\begin{align}
+	P(A|\lambda)   =& \sum\limits_{Q\in Q^*} P(A,Q|\lambda)\\
+	P(A,Q|\lambda) =& P(A|Q,\lambda) P(Q|\lambda)
+\end{align}
+%
+kde $Q^*$ jsou všechny možné posloupnosti stavů $Q$.
+
+Při zafixování posloupnosti stavů $Q = q_1\dots q_T$ je pak:
+%
+\begin{align}
+	P(A|Q,\lambda) =& y_{q_1}(a_1)\dots y_{q_T}(a_T)\\
+	P(Q|\lambda)   =& \pi_{q_1}x_{q_1q_2}x_{q_2q_3}\dots x_{q_{T-1}q_T}
+\end{align}
+%
+díky čemuž dostáváme výsledné vyjádření:
+%
+\begin{equation}
+	P(A|\lambda) = \sum\limits_{q_1,\dots,q_T} \pi_{q_1}y_{q_1}(a_1)x_{q_1q_2}y_{q_2}(a_2)\dots x_{q_{T-1}q_T}y_{q_T}(a_T)
+	\label{eq:am}
+\end{equation}
+
+Počet potřebných výpočtů pro rovnici \ref{eq:am} je ale $\approx 2T \cdot N^T$. Což například pro $N=5, T=100$ činí $2 \cdot 100 \cdot 5^{100} \approx 10^{72}$ výpočtů. Pro zefektivnění těchto výpočtů lze nasadit například {\sl forward-backward} algoritmus \cite{galindo_1995}.
+
+Jiné interpretace AM mohou zahrnovat například neuronové sítě \cite{kingsbury_2009}, nebo {\sl dynamic time warping} \cite{tarar_2010}.
 
 Aby model mohl poskytovat rozumné výsledky, je potřeba jej nejprve natrénovat na nějakém jazykovém korpusu, například pro tento účel lze využít Baum-Welchova trénovacího algoritmu \cite{han_2003}, nebo Viterbiho trénovacího algoritmu \cite{franzini_1990}.
 
